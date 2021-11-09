@@ -1,62 +1,48 @@
-import socket
-import threading
-
-server = socket.socket(
-
-    socket.AF_INET,
-    socket.SOCK_STREAM,
-
-)
+from Socket import Socket
+import asyncio
 
 
-server.bind(
-    ("127.0.0.1", 1234)  # localhost
-)
+class Server(Socket):
+    def __init__(self):
+        super(Server, self).__init__()
+        print("Server is listening")
+        self.users = []
 
-server.listen(5)
-print("Server is listening")
+    def set_up(self):
+        self.socket.bind(("127.0.0.1", 1234))
+        self.socket.listen(5)
+        self.socket.setblocking(False)
 
+    async def send_data(self, data):
+        for user in self.users:
+            await self.main_loop.sock_sendall(user, data)
 
-users = []
+    async def listen_socket(self, listened_socket=None):
+        if not listened_socket:
+            return
+        while True:
+            data = self.main_loop.sock_recv(listened_socket, 2048)
+            print(f"User sent {data}")
+            await self.send_data(data)
 
+    async def accept_sockets(self):
+        while True:
+            user_socket, address = await self.main_loop.sock_accept(self.socket)  # blocking
+            print(f"User {address[0]} connected")
+            self.users.append(user_socket)
+            self.main_loop.create_task(self.listen_socket(user_socket))
 
-def send_all(data):
-    for user in users:
-        user.send(data)
-
-
-def listen_user(user):
-
-    print('Listening user')
-
-    while True:
-        data = user.recv(2048)
-        print(f"User sent {data}")
-        send_all(data)
-
-
-def start_server():
-    while True:
-        user_socket, address = server.accept()  # blocking
-        print(f"User {address[0]} connected")
-
-        users.append(user_socket)
-        listen_accepted_user = threading.Thread(
-            target=listen_user,
-            args=(user_socket, )
-        )
-
-        listen_accepted_user.start()
-
-        # messages
-
-        print(1)
+    async def main(self):
+        await self.main_loop.create_task(self.accept_sockets())
 
 
 if __name__ == '__main__':
-    start_server()
+    server = Server()
+    server.set_up()
 
+    server.start()
 # main - присоединение клиентов
 # client_1_listen
 # client_2_listen
+# main loop
 
