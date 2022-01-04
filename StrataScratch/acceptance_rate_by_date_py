@@ -1,0 +1,8 @@
+import pandas as pd
+
+fb_friend_requests.head()
+req_sent = fb_friend_requests[fb_friend_requests['action']=='sent'].copy()
+req_acc = fb_friend_requests[fb_friend_requests['action']=='accepted'].copy()
+abt = req_sent.merge(req_acc, how='left', on=['user_id_sender', 'user_id_receiver'])
+abt['accepted'] = abt['action_y'].replace('accepted', 1).fillna(0)
+abt.groupby('date_x')['accepted'].mean().reset_index()
