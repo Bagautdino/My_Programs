@@ -1,0 +1,8 @@
+with req_sent as (select * from fb_friend_requests t
+where t.action = 'sent'), 
+req_acc as (select * from fb_friend_requests t
+where t.action = 'accepted')
+
+select t.date, avg(case when ra.action is not null then 1 else 0 end) as acceptance_rate
+from req_sent t
+left join req_acc ra on t.user_id_sender = ra.user_id_sender and t.user_id_receiver = ra.user_id_receiver
