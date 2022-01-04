@@ -1,0 +1,10 @@
+select dd.department, count(1), max(t.salary) from db_employee t
+left join db_dept dd on t.department_id = dd.id
+group by dd.department;
+
+select (select max(t.salary) from db_employee t
+left join db_dept dd on t.department_id = dd.id
+
+where dd.department = 'marketing') -(select max(t.salary) from db_employee t
+left join db_dept dd on t.department_id = dd.id
+where dd.department = 'engineering') as salary;
