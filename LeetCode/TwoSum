@@ -1,0 +1,11 @@
+class Solution:
+    def TwoSum(self, nums, target):
+        d = {}
+        n = len(nums)
+        for i in range(n):
+            compliment = target - nums[i]
+            if nums[i] in d:
+                return [i , d[nums[i]]]
+            else:
+                d[compliment] = i
+
